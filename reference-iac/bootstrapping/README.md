@@ -94,3 +94,19 @@ aws ec2 run-instances \
   --security-group-ids sg-066412c1406b41de3 \
   --user-data file://bootstrap-4.txt
   ```
+
+You can also use the CLI to find running instances and their IP addresses:
+
+```
+aws ec2 describe-instances \
+  --filters "Name=instance-state-name,Values=running" \
+  --query 'Reservations[0].Instances[0].[InstanceId,PublicIpAddress]' \
+  --output text
+```
+
+Finally, you can stop or terminate an instance by ID:
+
+```
+aws ec2 stop-instances --instance-ids i-0d809bad47d42f16d
+aws ec2 termiante-instances --instance-ids i-0d809bad47d42f16d
+```
