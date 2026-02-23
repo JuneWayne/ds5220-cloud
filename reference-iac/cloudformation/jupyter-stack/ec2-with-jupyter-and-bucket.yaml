@@ -1,6 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: CloudFormation template that creates an EC2 instance with bootstrapping script, custom EBS volume, S3 bucket, and IAM role for bucket access
 
+# here are the parameters we need from the user to customize the stack
 Parameters:
   InstanceType:
     Description: The EC2 instance type
@@ -12,7 +13,7 @@ Parameters:
       - t3.medium
   KeyName:
     Description: Name of an existing EC2 key pair to allow SSH access to the instances
-    Type: 'AWS::EC2::KeyPair::KeyName'
+    Type: "AWS::EC2::KeyPair::KeyName"
   UvaId:
     Description: Your UVA computing ID
     Type: String
@@ -43,7 +44,7 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
@@ -66,7 +67,7 @@ Resources:
     Properties:
       PolicyName: S3BucketAccessPolicy
       PolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Action:
@@ -110,7 +111,7 @@ Resources:
           #!/bin/bash
 
           apt update
-          
+
           snap install docker
           sleep 10
           docker run -d --restart=always -p 8888:8888 quay.io/jupyter/base-notebook start-notebook.py --NotebookApp.token='my-token'
@@ -123,8 +124,8 @@ Resources:
 
           # docker volume create --driver local --opt type=none --opt device=/data --opt o=bind jupyter-volume
           docker run -d --restart always -p 8888:8888 quay.io/jupyter/base-notebook start-notebook.py --NotebookApp.token='my-token'
-          
-          echo "Completed bootstrapping"  
+
+          echo "Completed bootstrapping"
       Tags:
         - Key: Name
           Value: !Sub ${AWS::StackName}-ec2-instance
