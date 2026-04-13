@@ -1,14 +1,20 @@
 # BYOC Lambda
 
+## Container Image
+
+References:
+- `app.py`
+- `Dockerfile`
+- `requirements.txt`
+  
 ```
+# Simple build
 docker build --platform linux/amd64 --provenance=false -t my-lambda-fn .
-```
 
 > **Note:** The `--platform linux/amd64` flag ensures the image targets Lambda's default
 > x86_64 runtime (important if building on Apple Silicon). The `--provenance=false` flag
 > prevents Docker BuildKit from producing OCI image manifests that Lambda does not support.
 
-```
 # Authenticate
 aws ecr get-login-password --region us-east-1 | \
   docker login --username AWS --password-stdin \
@@ -24,6 +30,8 @@ aws ecr create-repository --repository-name my-lambda-fn
 # Push
 docker push 440848399208.dkr.ecr.us-east-1.amazonaws.com/my-lambda-fn:latest
 ```
+
+## Trust
 
 Create a `trust-policy.json` file that allows Lambda to assume the role:
 ```json
@@ -52,6 +60,8 @@ aws iam attach-role-policy \
   --role-name lambda-execution-role \
   --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
 ```
+
+## IAM Permissions
 
 Create a `lambda-s3-policy.json` file that grants S3 GetObject access to a specific bucket
 and permission to list all buckets:
@@ -95,6 +105,8 @@ aws iam create-policy-version \
   --set-as-default
 ```
 
+## Create the Lambda Function
+
 ```
 aws lambda create-function \
   --function-name my-lambda-fn \
@@ -121,6 +133,8 @@ aws lambda update-function-configuration \
 > in `CreationDate`), which are not JSON-serializable. Convert them with `.isoformat()`
 > before returning from your handler, or Lambda will fail to serialize the response.
 
+## Run and Test
+
 ```
 aws lambda invoke --function-name my-lambda-fn output.json
 cat output.json
@@ -133,7 +147,7 @@ aws lambda update-function-code \
   --image-uri 440848399208.dkr.ecr.us-east-1.amazonaws.com/my-lambda-fn:latest
 ```
 
-## CloudFormation
+## Deploy Using CloudFormation
 
 Assume you have a container image built and pushed to ECR, and that you know the IAM policy statements you would like for your BYOC Lambda function. You can create the policy, role, and Lambda function itself using CloudFormation.
 
